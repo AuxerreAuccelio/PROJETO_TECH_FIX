@@ -1,0 +1,70 @@
+-- SERVIÇOS (Nome do serviço, Categoria, Preço Base, Horas de Trabalho)
+
+('Formatação e Instalação de Sistema Operacional', 'Computadores', 12000, 2.0),
+('Limpeza Interna e Troca de Pasta Térmica', 'Computadores', 15000, 1.5),
+('Upgrade de Hardware (RAM/SSD)', 'Computadores', 8000, 1.0),
+('Remoção de Vírus e Malwares', 'Computadores', 10000, 1.5),
+('Troca de Tela de Notebook', 'Computadores', 18000, 1.5),
+('Troca de Display/Frontal de Celular', 'Celulares', 15000, 1.0),
+('Troca de Bateria de Smartphone', 'Celulares', 9000, 0.5),
+('Desoxidação após Contato com Líquido', 'Celulares', 20000, 3.0),
+('Reparo em Conector de Carga (Micro USB / Type-C)', 'Celulares', 11000, 1.5),
+('Troca de Barra de LED de Smart TV', 'Smart TVs', 35000, 3.0),
+('Reparo na Placa Principal de Smart TV', 'Smart TVs', 28000, 2.5),
+('Conserto de Fonte de Alimentação Interna (TV)', 'Smart TVs', 22000, 2.0),
+('Configuração de Rede e Roteador Wi-Fi', 'Redes', 9000, 1.0),
+('Higienização e Troca de Metal Líquido / Pasta Térmica (Console)', 'Videogames', 22000, 2.0),
+('Reparo de Drift em Analógico de Controle (Joy-Con / DualSense / Xbox)', 'Videogames', 8000, 1.0),
+('Substituição de HDMI / Conector de Vídeo (Console)', 'Videogames', 25000, 2.5),
+('Troca de Bateria de Caixa de Som Portátil (Bluetooth)', 'Áudio', 12000, 1.5),
+('Troca de Almofadas / Reparo de Cabo de Headset Gamer', 'Áudio', 7000, 1.0),
+('Recuperação de Dados de HD / SSD / Pendrive Danificado', 'Recuperação de Dados', 30000, 4.0),
+('Rebaling / Reparo de BGA em Placa Mãe ou Placa de Vídeo', 'Eletrônica Avançada', 45000, 5.0),
+('Gravação e Reprogramação de BIOS Eprom (Notebook / Desktop)', 'Eletrônica Avançada', 16000, 2.0),
+('Troca de Vidro Traseiro de Smartphone a Laser / Manual', 'Celulares', 18000, 2.5),
+('Reparo e Solda de Conector Jack P2/P10 de Mesa de Som ou Amplificador', 'Áudio', 9500, 1.0)
+
+
+-- PEÇAS (Nome da peça, Categoria, Preço de Compra, Preço de Venda, Estoque Atual)
+
+-- Informática / Computadores
+('SSD NVMe 512GB M.2', 'Informática', 14000, 26000, 15),
+('SSD SATA III 480GB 2.5"', 'Informática', 11000, 21000, 20),
+('Memória RAM DDR4 8GB 2666MHz (Notebook)', 'Informática', 9000, 17000, 12),
+('Memória RAM DDR4 16GB 3200MHz (Desktop)', 'Informática', 18000, 32000, 8),
+('Pasta Térmica de Alta Performance (Bisnaga 4g)', 'Insumos', 2500, 6000, 25),
+('Fonte ATX 500W 80 Plus Bronze', 'Informática', 19000, 34000, 6),
+('Bateria Célula Moeda CR2032 (Cartela c/ 5)', 'Insumos', 800, 2500, 30),
+('Cooler para Processador Socket Universal', 'Informática', 4500, 9500, 10),
+('Cabo SATA III 6Gbps 50cm', 'Acessórios', 300, 1500, 50),
+('Tela LED 15.6" Slim 30 Pinos Full HD', 'Telas', 28000, 48000, 5),
+
+-- Smartphones / Celulares
+('Display Frontal Completo iPhone 11', 'Telas', 18000, 35000, 4),
+('Display Frontal Completo Samsung Galaxy A54', 'Telas', 16000, 31000, 6),
+('Display Frontal Completo Motorola Moto G84', 'Telas', 14000, 28000, 5),
+('Bateria Compatível iPhone 11 (3110mAh)', 'Baterias', 7500, 16000, 8),
+('Bateria Compatível Samsung Galaxy A32', 'Baterias', 6000, 13000, 7),
+('Bateria Compatível Moto G30', 'Baterias', 5500, 12000, 6),
+('Conector de Carga Type-C Universal (Unidade)', 'Componentes', 250, 2000, 100),
+('Conector de Carga Micro USB V8', 'Componentes', 150, 1500, 100),
+('Flex de Carga e Microfone Moto G9 Play', 'Componentes', 1800, 5500, 10),
+('Tampa Traseira de Vidro iPhone 12', 'Carcaças', 4000, 11000, 4),
+('Câmera Traseira Principal Redmi Note 11', 'Componentes', 6500, 14000, 3),
+('Alto-Falante Auricular Universal', 'Componentes', 500, 2500, 40),
+
+-- Smart TVs
+('Barra de LED TV Samsung 50" (Kit com 3 barras)', 'TVs', 11000, 23000, 4),
+('Barra de LED TV LG 43" (Kit com 3 barras)', 'TVs', 9500, 19500, 5),
+('Placa Fonte TV Samsung UN50TU8000', 'TVs', 16000, 31000, 2),
+('Placa Principal TV LG 43UP7500', 'TVs', 21000, 42000, 2),
+('Cabo Flat T-Con para Display TV 55"', 'TVs', 2200, 6500, 8),
+('Receptor Infravermelho para Controle Remoto TV', 'Componentes', 400, 2000, 15),
+
+-- Insumos e Componentes Genéricos
+('Solda em Fio Sn60/Pb40 0.8mm (Carretel 500g)', 'Insumos', 8500, 15000, 3),
+('Álcool Isopropílico 99.8% 1 Litro', 'Insumos', 2200, 4500, 12),
+('Fita Kapton Térmica 10mm x 33m', 'Insumos', 1200, 3000, 15),
+('Fita Dupla Face Fixação de Telas (3mm x 50m)', 'Insumos', 1500, 3500, 10),
+('Fusível de Louça 5A 250V (Pacote c/ 10)', 'Componentes', 500, 1800, 20),
+('Capacitor Eletrolítico 1000uF x 25V', 'Componentes', 80, 500, 150)
