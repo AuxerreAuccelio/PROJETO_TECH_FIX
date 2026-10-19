@@ -172,12 +172,11 @@ CREATE TABLE ordem_servicos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_ordem INTEGER NOT NULL,
     id_servico INTEGER NOT NULL,
-    valor_unitario INTEGER NOT NULL,
-    id_tecnico INTEGER NOT NULL,
-    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),
+    preco INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+    data_execucao TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
     FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_servico) REFERENCES servicos(id),
-    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao)
+    FOREIGN KEY (id_servico) REFERENCES servicos(id)    
 ) STRICT;
 
 -- 15. Cria tabela ordem_situacao
