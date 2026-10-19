@@ -137,7 +137,7 @@ CREATE TABLE pecas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome_peca TEXT NOT NULL COLLATE NOCASE,
     id_categoria INTEGER NOT NULL,
-    preco_compra INTEGER NOT NULL,
+    -- preco_compra INTEGER NOT NULL, --
     preco_venda INTEGER NOT NULL,
     estoque_atual INTEGER NOT NULL,
     id_funcionario INTEGER NOT NULL,
