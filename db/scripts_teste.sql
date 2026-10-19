@@ -185,8 +185,7 @@ CREATE TABLE ordem_situacao (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_ordem INTEGER NOT NULL,
     id_nova_situacao INTEGER NOT NULL,
-    id_tecnico INTEGER NOT NULL,
-    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),
+    id_funcionario INTEGER NOT NULL,    
     data_situacao TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),   
     FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
     FOREIGN KEY (id_nova_situacao) REFERENCES situacao(id),
@@ -197,15 +196,13 @@ CREATE TABLE ordem_situacao (
 CREATE TABLE ordem_pecas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_ordem INTEGER NOT NULL,
-    id_peca INTEGER NOT NULL,
+    id_peca INTEGER NOT NULL,    
+    preco INTEGER NOT NULL,
     quantidade INTEGER NOT NULL CHECK (quantidade > 0),
-    valor_unitario INTEGER NOT NULL,
-    data_saida TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
-    id_tecnico INTEGER NOT NULL,
-    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),
+    data_saida TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),    
     FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_peca) REFERENCES pecas(id),
-    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao)
+    FOREIGN KEY (id_peca) REFERENCES pecas(id)
+    
 ) STRICT;
 
 -- ============================================================================
