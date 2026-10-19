@@ -136,9 +136,8 @@ CREATE TABLE servicos (
 CREATE TABLE pecas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome_peca TEXT NOT NULL COLLATE NOCASE,
-    id_categoria INTEGER NOT NULL,
-    -- preco_compra INTEGER NOT NULL, --
-    preco_venda INTEGER NOT NULL,
+    id_categoria INTEGER NOT NULL,    
+    preco_sugerido_venda INTEGER NOT NULL,    
     estoque_atual INTEGER NOT NULL,
     id_funcionario INTEGER NOT NULL,
     id_funcionario_funcao INTEGER NOT NULL CHECK (id_funcionario_funcao = 1),
@@ -152,22 +151,20 @@ CREATE TABLE pecas (
 CREATE TABLE ordem (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_equipamento INTEGER NOT NULL,
-    id_funcionario_abertura INTEGER NOT NULL,
-    id_funcionario_funcao_abertura INTEGER NOT NULL CHECK (id_funcionario_funcao_abertura = 1 OR id_funcionario_funcao_abertura = 2),
+    defeito_relatado TEXT,
+    defeito_constatado TEXT,
     data_abertura TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
     data_fechamento TEXT,
-    id_forma_pagamento INTEGER NOT NULL,
-    id_situacao_atual INTEGER NOT NULL,
-    descricao_defeito TEXT NOT NULL,
-    defeito_constatado TEXT,
     valor_total INTEGER,
+    id_forma_pagamento INTEGER NOT NULL,
+    id_funcionario_abertura INTEGER NOT NULL,
+    id_funcionario_funcao_abertura INTEGER NOT NULL CHECK (id_funcionario_funcao_abertura = 1 OR id_funcionario_funcao_abertura = 2),
     id_tecnico INTEGER NOT NULL,
-    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),
-    FOREIGN KEY (id_equipamento) REFERENCES equipamento(id),
-    FOREIGN KEY (id_funcionario_abertura, id_funcionario_funcao_abertura) REFERENCES funcionario(id, id_funcao),
-    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao),
+    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),   
+    FOREIGN KEY (id_equipamento) REFERENCES equipamento(id),  
     FOREIGN KEY (id_forma_pagamento) REFERENCES forma_pagamento(id),
-    FOREIGN KEY (id_situacao_atual) REFERENCES situacao(id)
+    FOREIGN KEY (id_funcionario_abertura, id_funcionario_funcao_abertura) REFERENCES funcionario(id, id_funcao),
+    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao)    
 ) STRICT;
 
 -- 14. Cria tabela ordem_servicos

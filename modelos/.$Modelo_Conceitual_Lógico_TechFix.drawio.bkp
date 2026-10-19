@@ -365,7 +365,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="QERghDlhxc2idiYxlKbO" name="Logico">
-    <mxGraphModel dx="975" dy="578" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="1178" dy="698" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1526,7 +1526,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="I-2Eg8wsW8j1MtTpCsZE-15" parent="I-2Eg8wsW8j1MtTpCsZE-13" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="preco_compra INTEGER NOT NULL" vertex="1">
+        <mxCell id="I-2Eg8wsW8j1MtTpCsZE-15" parent="I-2Eg8wsW8j1MtTpCsZE-13" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
@@ -1539,7 +1539,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="wvVM3UM9gKXBmytoBkff-35" parent="wvVM3UM9gKXBmytoBkff-33" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="preco_venda INTEGER NOT NULL" vertex="1">
+        <mxCell id="wvVM3UM9gKXBmytoBkff-35" parent="wvVM3UM9gKXBmytoBkff-33" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="preco_sugerido_venda INTEGER NOT NULL" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
@@ -2032,7 +2032,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="p__j4CtJiQ9JisqglFvU-3" parent="p__j4CtJiQ9JisqglFvU-1" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="" vertex="1">
+        <mxCell id="p__j4CtJiQ9JisqglFvU-3" parent="p__j4CtJiQ9JisqglFvU-1" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="valor_unitario&amp;nbsp; INTEGER NOT NULL&amp;nbsp;" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
@@ -2058,7 +2058,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TLIXWwK4RXn2D8f8wRVr-60" parent="TLIXWwK4RXn2D8f8wRVr-58" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="valor_unitario&amp;nbsp; INTEGER NOT NULL&amp;nbsp;" vertex="1">
+        <mxCell id="TLIXWwK4RXn2D8f8wRVr-60" parent="TLIXWwK4RXn2D8f8wRVr-58" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
@@ -2071,7 +2071,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TLIXWwK4RXn2D8f8wRVr-63" parent="TLIXWwK4RXn2D8f8wRVr-61" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="data_saida TEXT NOT NULL DEFAULT (DATETIME(&quot;now&quot;, &quot;localtime&quot;))&amp;nbsp;" vertex="1">
+        <mxCell id="TLIXWwK4RXn2D8f8wRVr-63" parent="TLIXWwK4RXn2D8f8wRVr-61" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
@@ -2110,7 +2110,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TLIXWwK4RXn2D8f8wRVr-72" parent="TLIXWwK4RXn2D8f8wRVr-70" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="" vertex="1">
+        <mxCell id="TLIXWwK4RXn2D8f8wRVr-72" parent="TLIXWwK4RXn2D8f8wRVr-70" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="data_saida TEXT NOT NULL DEFAULT (DATETIME(&quot;now&quot;, &quot;localtime&quot;))&amp;nbsp;" vertex="1">
           <mxGeometry height="30" width="280" x="30" as="geometry">
             <mxRectangle height="30" width="280" as="alternateBounds" />
           </mxGeometry>
