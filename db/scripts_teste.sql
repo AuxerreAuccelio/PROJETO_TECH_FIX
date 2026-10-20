@@ -187,8 +187,8 @@ CREATE TABLE ordem_situacao (
     id_funcionario INTEGER NOT NULL,    
     data_situacao TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),   
     FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_nova_situacao) REFERENCES situacao(id),
-    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao)
+    FOREIGN KEY (id_funcionario) REFERENCES funcionario(id),
+    FOREIGN KEY (id_nova_situacao) REFERENCES situacao(id)    
 ) STRICT;
 
 -- 16. Cria tabela ordem_pecas
@@ -200,9 +200,105 @@ CREATE TABLE ordem_pecas (
     quantidade INTEGER NOT NULL CHECK (quantidade > 0),
     data_saida TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),    
     FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_peca) REFERENCES pecas(id)
-    
+    FOREIGN KEY (id_peca) REFERENCES pecas(id)    
 ) STRICT;
+
+
+
+-- 17. Cria tabela entrada_pecas
+CREATE TABLE entrada_pecas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_peca INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+    preco_custo INTEGER NOT NULL CHECK (preco_custo >= 0),
+    preco_venda_sugerido INTEGER NOT NULL CHECK (preco_venda_sugerido >= 0),
+    data_entrada TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+    id_funcionario INTEGER NOT NULL,
+    id_funcionario_funcao INTEGER NOT NULL CHECK (id_funcionario_funcao = 1), -- só Gerente
+    FOREIGN KEY (id_peca) REFERENCES pecas(id),
+    FOREIGN KEY (id_funcionario, id_funcionario_funcao) REFERENCES funcionario(id, id_funcao)
+) STRICT;
+
+CREATE TRIGGER trg_entrada_pecas_atualiza_estoque
+AFTER INSERT ON entrada_pecas
+BEGIN
+    UPDATE pecas
+    SET estoque_atual = estoque_atual + NEW.quantidade,
+        preco_sugerido_venda = NEW.preco_venda_sugerido  -- mantém o último preço sugerido
+    WHERE id = NEW.id_peca;
+END;
+
+
+
+-- 18. Cria tabela motivo_saida
+CREATE TABLE motivo_saida (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome_motivo TEXT NOT NULL COLLATE NOCASE UNIQUE
+) STRICT;
+
+CREATE TABLE saida_pecas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_peca INTEGER NOT NULL,
+    id_motivo INTEGER NOT NULL CHECK (id_motivo IN (1, 2)), -- 1 = Uso em reparo, 2 = Descarte
+    id_ordem INTEGER,                                       -- obrigatório só no uso em reparo
+    quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+    valor_unitario INTEGER NOT NULL CHECK (valor_unitario >= 0),
+    data_saida TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+    id_tecnico INTEGER NOT NULL,
+    id_tecnico_funcao INTEGER NOT NULL CHECK (id_tecnico_funcao = 3),
+    CHECK ((id_motivo = 1 AND id_ordem IS NOT NULL)
+        OR (id_motivo = 2 AND id_ordem IS NULL)),
+    FOREIGN KEY (id_peca) REFERENCES pecas(id),
+    FOREIGN KEY (id_motivo) REFERENCES motivo_saida(id),
+    FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_tecnico, id_tecnico_funcao) REFERENCES funcionario(id, id_funcao)
+) STRICT;
+
+-- Bloqueia estoque negativo
+CREATE TRIGGER trg_saida_pecas_valida_estoque
+BEFORE INSERT ON saida_pecas
+WHEN NEW.quantidade > (SELECT estoque_atual FROM pecas WHERE id = NEW.id_peca)
+BEGIN
+    SELECT RAISE(ABORT, 'Estoque insuficiente para a baixa da peça');
+END;
+
+-- Dá a baixa
+CREATE TRIGGER trg_saida_pecas_atualiza_estoque
+AFTER INSERT ON saida_pecas
+BEGIN
+    UPDATE pecas
+    SET estoque_atual = estoque_atual - NEW.quantidade
+    WHERE id = NEW.id_peca;
+END;
+
+
+
+-- 19. Cria tabela saida_peca
+CREATE TABLE saida_peca (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_peca INTEGER NOT NULL,
+    id_ordem INTEGER,                                   -- nulo no descarte
+    quantidade_saida INTEGER NOT NULL CHECK (quantidade_saida > 0),
+    valor_saida INTEGER NOT NULL CHECK (valor_saida > 0),
+    numero_serie TEXT NOT NULL COLLATE NOCASE,
+    numero_lote TEXT NOT NULL COLLATE NOCASE,
+    id_funcionario INTEGER NOT NULL,
+    id_funcionario_funcao INTEGER NOT NULL CHECK (id_funcionario_funcao = 3),  -- só Técnico
+    id_situacao INTEGER NOT NULL,
+    data_saida TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+    CHECK ((id_situacao = 9 AND id_ordem IS NOT NULL)   -- uso em reparo exige OS
+        OR (id_situacao = 8 AND id_ordem IS NULL)),     -- descarte não tem OS
+    FOREIGN KEY (id_peca) REFERENCES pecas(id),
+    FOREIGN KEY (id_ordem) REFERENCES ordem(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_funcionario, id_funcionario_funcao) REFERENCES funcionario(id, id_funcao),
+    FOREIGN KEY (id_situacao) REFERENCES situacao(id)
+) STRICT;
+
+
+
+
+
+
 
 -- ============================================================================
 -- 2. INSERÇÕES (DML)
@@ -276,41 +372,46 @@ INSERT INTO servicos (nome_servicos, id_categoria, preco, horas_trabalho, id_fun
 INSERT INTO servicos (nome_servicos, id_categoria, preco, horas_trabalho, id_funcionario, id_funcionario_funcao) VALUES ('Rebaling / Reparo de BGA em Placa Mãe ou Placa de Vídeo', 8, 45000, 5.0, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
 INSERT INTO servicos (nome_servicos, id_categoria, preco, horas_trabalho, id_funcionario, id_funcionario_funcao) VALUES ('Gravação e Reprogramação de BIOS Eprom (Notebook / Desktop)', 8, 16000, 2.0, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
 
--- Insere peças
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('SSD NVMe 512GB M.2', 8, 14000, 26000, 15, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('SSD SATA III 480GB 2.5"', 8, 11000, 21000, 20, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Memória RAM DDR4 8GB 2666MHz (Notebook)', 8, 9000, 17000, 12, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Memória RAM DDR4 16GB 3200MHz (Desktop)', 8, 18000, 32000, 8, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Pasta Térmica de Alta Performance (Bisnaga 4g)', 9, 2500, 6000, 25, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Fonte ATX 500W 80 Plus Bronze', 8, 19000, 34000, 6, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Bateria Célula Moeda CR2032 (Cartela c/ 5)', 9, 800, 2500, 30, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Cooler para Processador Socket Universal', 8, 4500, 9500, 10, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Cabo SATA III 6Gbps 50cm', 10, 300, 1500, 50, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Tela LED 15.6" Slim 30 Pinos Full HD', 11, 28000, 48000, 5, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Display Frontal Completo iPhone 11', 11, 18000, 35000, 4, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Display Frontal Completo Samsung Galaxy A54', 11, 16000, 31000, 6, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Display Frontal Completo Motorola Moto G84', 11, 14000, 28000, 5, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Bateria Compatível iPhone 11 (3110mAh)', 12, 7500, 16000, 8, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Bateria Compatível Samsung Galaxy A32', 12, 6000, 13000, 7, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Bateria Compatível Moto G30', 12, 5500, 12000, 6, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Conector de Carga Type-C Universal (Unidade)', 13, 250, 2000, 100, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Conector de Carga Micro USB V8', 13, 150, 1500, 100, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Flex de Carga e Microfone Moto G9 Play', 13, 1800, 5500, 10, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Tampa Traseira de Vidro iPhone 12', 14, 4000, 11000, 4, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Câmera Traseira Principal Redmi Note 11', 13, 6500, 14000, 3, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Alto-Falante Auricular Universal', 13, 500, 2500, 40, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Barra de LED TV Samsung 50" (Kit com 3 barras)', 15, 11000, 23000, 4, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Barra de LED TV LG 43" (Kit com 3 barras)', 15, 9500, 19500, 5, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Placa Fonte TV Samsung UN50TU8000', 15, 16000, 31000, 2, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Placa Principal TV LG 43UP7500', 15, 21000, 42000, 2, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Cabo Flat T-Con para Display TV 55"', 15, 2200, 6500, 8, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Receptor Infravermelho para Controle Remoto TV', 13, 400, 2000, 15, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Solda em Fio Sn60/Pb40 0.8mm (Carretel 500g)', 9, 8500, 15000, 3, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Álcool Isopropílico 99.8% 1 Litro', 9, 2200, 4500, 12, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Fita Kapton Térmica 10mm x 33m', 9, 1200, 3000, 15, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Fita Dupla Face Fixação de Telas (3mm x 50m)', 9, 1500, 3500, 10, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Fusível de Louça 5A 250V (Pacote c/ 10)', 13, 500, 1800, 20, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
-INSERT INTO pecas (nome_peca, id_categoria, preco_compra, preco_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES ('Capacitor Eletrolítico 1000uF x 25V', 13, 80, 500, 150, 1, (SELECT id_funcao FROM funcionario WHERE id=1));
+-- Insere peças (estoque zerado; o estoque entra via entrada_pecas)
+INSERT INTO pecas (nome_peca, id_categoria, preco_sugerido_venda, estoque_atual, id_funcionario, id_funcionario_funcao) VALUES
+('SSD NVMe 512GB M.2', 8, 26000, 0, 1, 1),
+('SSD SATA III 480GB 2.5"', 8, 21000, 0, 1, 1),
+('Memória RAM DDR4 8GB 2666MHz (Notebook)', 8, 17000, 0, 1, 1),
+('Memória RAM DDR4 16GB 3200MHz (Desktop)', 8, 32000, 0, 1, 1),
+('Pasta Térmica de Alta Performance (Bisnaga 4g)', 9, 6000, 0, 1, 1),
+('Fonte ATX 500W 80 Plus Bronze', 8, 34000, 0, 1, 1),
+('Bateria Célula Moeda CR2032 (Cartela c/ 5)', 9, 2500, 0, 1, 1),
+('Cooler para Processador Socket Universal', 8, 9500, 0, 1, 1),
+('Cabo SATA III 6Gbps 50cm', 10, 1500, 0, 1, 1),
+('Tela LED 15.6" Slim 30 Pinos Full HD', 11, 48000, 0, 1, 1),
+('Display Frontal Completo iPhone 11', 11, 35000, 0, 1, 1),
+('Display Frontal Completo Samsung Galaxy A54', 11, 31000, 0, 1, 1),
+('Display Frontal Completo Motorola Moto G84', 11, 28000, 0, 1, 1),
+('Bateria Compatível iPhone 11 (3110mAh)', 12, 16000, 0, 1, 1),
+('Bateria Compatível Samsung Galaxy A32', 12, 13000, 0, 1, 1),
+('Bateria Compatível Moto G30', 12, 12000, 0, 1, 1),
+('Conector de Carga Type-C Universal (Unidade)', 13, 2000, 0, 1, 1),
+('Conector de Carga Micro USB V8', 13, 1500, 0, 1, 1),
+('Flex de Carga e Microfone Moto G9 Play', 13, 5500, 0, 1, 1),
+('Tampa Traseira de Vidro iPhone 12', 14, 11000, 0, 1, 1),
+('Câmera Traseira Principal Redmi Note 11', 13, 14000, 0, 1, 1),
+('Alto-Falante Auricular Universal', 13, 2500, 0, 1, 1),
+('Barra de LED TV Samsung 50" (Kit com 3 barras)', 15, 23000, 0, 1, 1),
+('Barra de LED TV LG 43" (Kit com 3 barras)', 15, 19500, 0, 1, 1),
+('Placa Fonte TV Samsung UN50TU8000', 15, 31000, 0, 1, 1),
+('Placa Principal TV LG 43UP7500', 15, 42000, 0, 1, 1),
+('Cabo Flat T-Con para Display TV 55"', 15, 6500, 0, 1, 1),
+('Receptor Infravermelho para Controle Remoto TV', 13, 2000, 0, 1, 1),
+('Solda em Fio Sn60/Pb40 0.8mm (Carretel 500g)', 9, 15000, 0, 1, 1),
+('Álcool Isopropílico 99.8% 1 Litro', 9, 4500, 0, 1, 1),
+('Fita Kapton Térmica 10mm x 33m', 9, 3000, 0, 1, 1),
+('Fita Dupla Face Fixação de Telas (3mm x 50m)', 9, 3500, 0, 1, 1),
+('Fusível de Louça 5A 250V (Pacote c/ 10)', 13, 1800, 0, 1, 1),
+('Capacitor Eletrolítico 1000uF x 25V', 13, 500, 0, 1, 1);
+
+
+
+
 
 COMMIT;
 
@@ -330,10 +431,7 @@ SELECT * FROM vw_preco_venda_maior_100;
 
 
 
--- let USER = `SELECT id_funcao FROM funcionario WHERE id = ${id_usuario}`; --
-DROP TABLE cliente;
 
-DROP TABLE pecas;
 
 
 
@@ -341,78 +439,14 @@ DROP TABLE pecas;
 
 
 
+aberto
+em diagnóstico
+orçamento aprovado
+em Reparo
+pronto
+entregue
+cancelado
+descarte por defeito/avaria
+uso em reparo ordem_servicos
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+deve se conectar com a tabela pecas
